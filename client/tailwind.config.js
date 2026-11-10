@@ -8,38 +8,47 @@ export default {
   theme: {
     extend: {
       colors: {
-        dark: {
-          900: '#07090e',
-          850: '#0b0f17',
-          800: '#111827',
-          700: '#1e293b',
-          600: '#334155',
+        terminal: {
+          bg: '#0B0F10',
+          panel: '#101517',
+          surface: '#141B1E',
+          card: '#161E22',
+          border: '#1E292F',
+          borderHighlight: '#2A3B44',
+          muted: '#8395A1',
+          dim: '#4E5F69',
         },
-        accent: {
-          light: '#38bdf8',
-          DEFAULT: '#0284c7',
-          dark: '#0369a1',
-          glow: 'rgba(56, 189, 248, 0.25)',
-        },
-        secondary: {
-          light: '#a855f7',
-          DEFAULT: '#8b5cf6',
-          dark: '#7c3aed',
+        neon: {
+          green: '#39FF88',
+          greenDark: '#27D66F',
+          greenDim: 'rgba(57, 255, 136, 0.15)',
+          greenGlow: 'rgba(57, 255, 136, 0.35)',
+          cyan: '#00D9FF',
+          cyanDark: '#00B4D8',
+          cyanDim: 'rgba(0, 217, 255, 0.15)',
+          cyanGlow: 'rgba(0, 217, 255, 0.35)',
+          amber: '#FFB84C',
+          red: '#FF5C5C',
+          purple: '#B779FF',
         }
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
-        mono: ['Fira Code', 'JetBrains Mono', 'monospace'],
+        mono: ['"JetBrains Mono"', '"Fira Code"', 'monospace'],
       },
       animation: {
-        'spin-slow': 'spin 12s linear infinite',
-        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'float': 'float 6s ease-in-out infinite',
+        'cursor-blink': 'cursorBlink 1s infinite',
+        'pulse-subtle': 'pulseSubtle 3s ease-in-out infinite',
+        'scanline': 'scanline 8s linear infinite',
       },
       keyframes: {
-        float: {
-          '0%, 100%': { transform: 'translateY(0px)' },
-          '50%': { transform: 'translateY(-10px)' },
+        cursorBlink: {
+          '0%, 49%': { opacity: '1' },
+          '50%, 100%': { opacity: '0' },
+        },
+        pulseSubtle: {
+          '0%, 100%': { opacity: '0.9', transform: 'scale(1)' },
+          '50%': { opacity: '1', transform: 'scale(1.02)' },
         }
       }
     },
