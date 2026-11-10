@@ -64,6 +64,30 @@ const AdminDashboard = () => {
   });
 
   const [statusMessage, setStatusMessage] = useState({ type: '', text: '' });
+  const [uploadingFile, setUploadingFile] = useState(false);
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('thumbnail', file);
+
+    try {
+      setUploadingFile(true);
+      const res = await axiosClient.post('/projects/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      if (res && res.url) {
+        setProjectFormData((prev) => ({ ...prev, thumbnail: res.url }));
+        showNotification('success', `Thumbnail "${file.name}" uploaded successfully!`);
+      }
+    } catch (err) {
+      showNotification('error', err.message || 'File upload failed');
+    } finally {
+      setUploadingFile(false);
+    }
+  };
 
   // Guard: if not authenticated, redirect to /login
   useEffect(() => {
@@ -640,15 +664,40 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <label className="text-gray-400 block">Thumbnail Image URL</label>
-                <input
-                  type="text"
-                  value={projectFormData.thumbnail}
-                  onChange={(e) => setProjectFormData({ ...projectFormData, thumbnail: e.target.value })}
-                  placeholder="https://..."
-                  className="w-full px-3 py-2 rounded-lg bg-[#0E1315] border border-[#1E292F] text-white focus:border-[#39FF88] focus:outline-none"
-                />
+              <div className="space-y-2">
+                <label className="text-gray-400 block">Thumbnail Image</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={projectFormData.thumbnail}
+                    onChange={(e) => setProjectFormData({ ...projectFormData, thumbnail: e.target.value })}
+                    placeholder="https://... or upload local file"
+                    className="flex-1 px-3 py-2 rounded-lg bg-[#0E1315] border border-[#1E292F] text-white focus:border-[#39FF88] focus:outline-none"
+                  />
+                  <label className="px-3 py-2 rounded-lg border border-[#1E292F] bg-[#141B1E] text-gray-300 hover:text-[#39FF88] hover:border-[#39FF88]/40 cursor-pointer flex items-center gap-1.5 transition-colors">
+                    <Upload className="w-4 h-4" />
+                    <span>{uploadingFile ? 'Uploading...' : 'Upload'}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                      disabled={uploadingFile}
+                    />
+                  </label>
+                </div>
+                {projectFormData.thumbnail && (
+                  <div className="flex items-center gap-2 pt-1">
+                    <img
+                      src={projectFormData.thumbnail}
+                      alt="Thumbnail Preview"
+                      className="w-12 h-12 object-cover rounded border border-[#1E292F]"
+                    />
+                    <span className="text-[11px] text-gray-500 truncate max-w-sm">
+                      {projectFormData.thumbnail}
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#1E292F]">
