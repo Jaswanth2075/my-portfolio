@@ -1,0 +1,30 @@
+{
+  "name": "fullstack-developer-portfolio",
+  "version": "1.0.0",
+  "description": "Full-Stack Developer Portfolio with React, Vite, Node.js, Express, MongoDB and Tailwind CSS",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev --prefix client\" \"npm run dev --prefix server\"",
+    "dev:client": "npm run dev --prefix client",
+    "dev:server": "npm run dev --prefix server",
+    "install:all": "npm install && npm install --prefix client && npm install --prefix server",
+    "build:client": "npm run build --prefix client",
+    "start:server": "npm start --prefix server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "keywords": [
+    "portfolio",
+    "mern",
+    "react",
+    "vite",
+    "nodejs",
+    "express",
+    "mongodb",
+    "tailwind",
+    "framer-motion"
+  ],
+  "author": "Jaswanth Naidu",
+  "license": "MIT"
+}
