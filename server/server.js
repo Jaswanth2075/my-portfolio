@@ -7,13 +7,36 @@ const dotenv = require('dotenv');
 // Load environment variables
 dotenv.config();
 
+// Database & Seeder
+const connectDB = require('./config/db');
+const seedDatabase = require('./services/seedService');
+
+// Route imports
+const authRoutes = require('./routes/authRoutes');
+const projectRoutes = require('./routes/projectRoutes');
+const contactRoutes = require('./routes/contactRoutes');
+const portfolioRoutes = require('./routes/portfolioRoutes');
+
+// Middleware imports
+const { errorHandler } = require('./middleware/errorMiddleware');
+const { apiLimiter } = require('./middleware/rateLimiter');
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Connect to MongoDB & optionally auto-seed
+connectDB().then((conn) => {
+  if (conn) {
+    seedDatabase().catch((err) => console.warn('Auto-seed notice:', err.message));
+  }
+});
+
 // Security Middlewares
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" }
-}));
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' }
+  })
+);
 
 const allowedOrigins = [
   process.env.CLIENT_URL || 'http://localhost:5173',
@@ -21,20 +44,22 @@ const allowedOrigins = [
   'http://127.0.0.1:5173'
 ];
 
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Blocked by CORS policy'));
-    }
-  },
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error('Blocked by CORS policy'));
+      }
+    },
+    credentials: true
+  })
+);
 
 // Body parsing
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Serve static uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -48,10 +73,11 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Root API route
+// Root API overview
 app.get('/api', (req, res) => {
   res.status(200).json({
     message: 'Welcome to Jaswanth Naidu Portfolio API',
+    version: '1.0.0',
     endpoints: {
       health: '/api/health',
       auth: '/api/auth',
@@ -62,6 +88,15 @@ app.get('/api', (req, res) => {
   });
 });
 
+// Apply rate limiter to general API routes
+app.use('/api', apiLimiter);
+
+// Mount API Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/projects', projectRoutes);
+app.use('/api/contact', contactRoutes);
+app.use('/api/portfolio', portfolioRoutes);
+
 // 404 handler for undefined API routes
 app.use('/api/*', (req, res) => {
   res.status(404).json({
@@ -70,14 +105,8 @@ app.use('/api/*', (req, res) => {
   });
 });
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error('Server Error:', err.message);
-  res.status(err.status || 500).json({
-    success: false,
-    message: err.message || 'Internal Server Error'
-  });
-});
+// Centralized error handling middleware
+app.use(errorHandler);
 
 // Start listening if run directly
 if (require.main === module) {
